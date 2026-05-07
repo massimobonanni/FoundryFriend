@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Set Endopint": {
+      "commandName": "Project",
+      "commandLineArgs": "set -e https://my.website.com "
+    },
+    "Set AccessKey": {
+      "commandName": "Project",
+      "commandLineArgs": "set -k 12345"
+    },
+    "Set Show": {
+      "commandName": "Project",
+      "commandLineArgs": "set show"
+    }
+  }
+}
