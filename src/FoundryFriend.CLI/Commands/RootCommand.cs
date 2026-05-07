@@ -1,4 +1,5 @@
 ﻿using FoundryFriend.CLI.Commands.Set;
+using FoundryFriend.CLI.Commands.Chat;
 using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 
@@ -11,7 +12,8 @@ internal class RootCommand : System.CommandLine.RootCommand
         this.Description = "The command-line interface for Foundry demos.";
 
         this.Subcommands.Add(new SetCommand(serviceProvider.GetSessionManager()));
-        
+        this.Subcommands.Add(new ChatCommand(serviceProvider.GetSessionManager()));
+
         for (int i = 0; i < this.Options.Count; i++)
         {
             if (this.Options[i] is VersionOption defaultVersionOption)
