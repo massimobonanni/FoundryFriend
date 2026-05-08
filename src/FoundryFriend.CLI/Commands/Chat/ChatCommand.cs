@@ -58,6 +58,12 @@ internal class ChatCommand : CommandBase
             return;
         }
 
+        if (!endpoint.EndsWith("/"))
+        {
+            endpoint += "/";
+        }
+        endpoint += "models";
+
         // Build the inference client based on authentication mode
         ChatCompletionsClient client;
         var authMode = _sessionManager.GetAuthenticationMode();

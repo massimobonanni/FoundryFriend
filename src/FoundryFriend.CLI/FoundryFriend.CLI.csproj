@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
+    <PackageReference Include="Azure.AI.Projects" Version="2.1.0-beta.1" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Figgle" Version="0.6.6" />
     <PackageReference Include="Figgle.Fonts" Version="0.6.6" />
@@ -19,6 +20,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FoundryFriend.Core\FoundryFriend.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AgentSamples\customer-support.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="AgentSamples\math-tutor.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="AgentSamples\ms-learn-assistant.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

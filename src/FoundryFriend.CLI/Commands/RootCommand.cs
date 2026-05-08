@@ -1,5 +1,6 @@
 ﻿using FoundryFriend.CLI.Commands.Set;
 using FoundryFriend.CLI.Commands.Chat;
+using FoundryFriend.CLI.Commands.Agent;
 using Microsoft.Extensions.DependencyInjection;
 using System.CommandLine;
 
@@ -13,6 +14,7 @@ internal class RootCommand : System.CommandLine.RootCommand
 
         this.Subcommands.Add(new SetCommand(serviceProvider.GetSessionManager()));
         this.Subcommands.Add(new ChatCommand(serviceProvider.GetSessionManager()));
+        this.Subcommands.Add(new AgentCommand(serviceProvider.GetSessionManager()));
 
         for (int i = 0; i < this.Options.Count; i++)
         {
