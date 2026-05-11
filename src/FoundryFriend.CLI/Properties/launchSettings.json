@@ -20,9 +20,17 @@
       "commandName": "Project",
       "commandLineArgs": "agent create ./AgentSamples/math-tutor.json"
     },
-    "Agent chat": {
+    "Agent Chat": {
       "commandName": "Project",
       "commandLineArgs": "agent chat -id doc-u-wan -p proj-AquilaTech"
+    },
+    "Agent List": {
+      "commandName": "Project",
+      "commandLineArgs": "agent list -p proj-AquilaTech"
+    },
+    "Set AuthMode": {
+      "commandName": "Project",
+      "commandLineArgs": "set -am identity"
     }
   }
 }

@@ -11,6 +11,7 @@ using FoundryFriend.Core.Interfaces;
 using OpenAI.Responses;
 using System.CommandLine;
 using System.Net;
+using System.Security.Cryptography;
 
 #pragma warning disable OPENAI001
 
@@ -72,12 +73,8 @@ internal class AgentChatCommand : CommandBase
 
         if (authMode == AuthenticationMode.Key)
         {
-            var accessKey = _sessionManager.GetAccessKey();
-            if (string.IsNullOrWhiteSpace(accessKey))
-            {
                 ConsoleUtility.WriteLine("Error: The agent creation cannot be run with access key", ConsoleColor.Red);
                 return;
-            }
         }
         else
         {
