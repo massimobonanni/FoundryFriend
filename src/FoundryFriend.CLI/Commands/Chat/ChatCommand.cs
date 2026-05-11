@@ -24,7 +24,7 @@ internal class ChatCommand : CommandBase
     public ChatCommand(ISessionManager sessionManager) :
         base("chat", "Start a chat with a specific model deployment in Foundry", sessionManager)
     {
-        _modelDeployNameOption = new Option<string>(name: "--modelDeployment")
+        _modelDeployNameOption = new Option<string>(name: "--model-deployment")
         {
             Description = "The model deployment name in Azure Foundry",
             Required = true,

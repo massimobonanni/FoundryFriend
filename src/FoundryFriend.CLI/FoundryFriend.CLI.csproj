@@ -29,6 +29,9 @@
     <None Update="AgentSamples\math-tutor.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="AgentSamples\doc-u-wan.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="AgentSamples\ms-learn-assistant.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

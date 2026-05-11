@@ -25,6 +25,12 @@ param gpt41Capacity int
 @description('SKU del deployment GPT-4.1.')
 param gpt41SkuName string
 
+@description('Resource ID di Application Insights per la telemetria del progetto Foundry.')
+param applicationInsightsId string
+
+@description('Resource ID del Log Analytics Workspace per i diagnostic settings.')
+param logAnalyticsWorkspaceId string
+
 resource foundry 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   name: foundryAccountName
   location: location
@@ -55,6 +61,32 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
   properties: {
     displayName: foundryProjectDisplayName
     description: 'Foundry Friend project'
+    #disable-next-line BCP037
+    applicationInsights: applicationInsightsId
+  }
+}
+
+resource foundryDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'foundry-diagnostics'
+  scope: foundry
+  properties: {
+    workspaceId: logAnalyticsWorkspaceId
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
+      {
+        categoryGroup: 'audit'
+        enabled: true
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
   }
 }
 

@@ -35,11 +35,23 @@ param tags object = {
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var resourceGroupName = 'rg-${environmentName}'
 var foundryAccountName = 'aif-${resourceToken}'
+var logAnalyticsWorkspaceName = 'law-${resourceToken}'
+var applicationInsightsName = 'appi-${resourceToken}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
   tags: tags
+}
+
+module monitoring 'modules/monitoring.bicep' = {
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    applicationInsightsName: applicationInsightsName
+  }
 }
 
 module foundry 'modules/foundry.bicep' = {
@@ -54,6 +66,8 @@ module foundry 'modules/foundry.bicep' = {
     gpt41ModelVersion: gpt41ModelVersion
     gpt41Capacity: gpt41Capacity
     gpt41SkuName: gpt41SkuName
+    applicationInsightsId: monitoring.outputs.applicationInsightsId
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
   }
 }
 
@@ -64,3 +78,6 @@ output AZURE_AI_FOUNDRY_ENDPOINT string = foundry.outputs.foundryEndpoint
 output AZURE_AI_FOUNDRY_PROJECT_NAME string = foundry.outputs.projectName
 output AZURE_AI_FOUNDRY_PROJECT_ENDPOINT string = foundry.outputs.projectEndpoint
 output AZURE_AI_FOUNDRY_GPT41_DEPLOYMENT string = foundry.outputs.gpt41DeploymentName
+output AZURE_LOG_ANALYTICS_WORKSPACE_NAME string = monitoring.outputs.logAnalyticsWorkspaceName
+output APPLICATIONINSIGHTS_NAME string = monitoring.outputs.applicationInsightsName
+output APPLICATIONINSIGHTS_CONNECTION_STRING string = monitoring.outputs.applicationInsightsConnectionString

@@ -14,6 +14,7 @@ namespace FoundryFriend.CLI.Commands.Agent;
 internal class AgentCreateCommand : CommandBase
 {
     private readonly Argument<string> _fileArgument;
+    private readonly Option<string> _projectName;
 
     public AgentCreateCommand(ISessionManager sessionManager)
         : base("create", "Create an agent from a configuration file", sessionManager)
@@ -23,6 +24,12 @@ internal class AgentCreateCommand : CommandBase
             Description = "Path to the agent configuration JSON file"
         };
         this.Arguments.Add(_fileArgument);
+
+        _projectName = new Option<string>("--project-name")
+        {
+            Description = "The name of the project in Foundry to create the agent in",
+            Required = true
+        };
 
         this.SetAction(CommandHandler);
     }
@@ -44,6 +51,8 @@ internal class AgentCreateCommand : CommandBase
             return;
         }
 
+        var projectName = parseResult.GetValue(_projectName)!;
+
         await _sessionManager.LoadSettingsAsync();
 
         var projectEndpoint = _sessionManager.GetEndpoint();
@@ -58,7 +67,7 @@ internal class AgentCreateCommand : CommandBase
         {
             projectEndpoint += "/";
         }
-        projectEndpoint += "api/projects/proj-AquilaTech";
+        projectEndpoint += $"api/projects/{projectName}";
 
         AIProjectClient projectClient = null!;
         var authMode = _sessionManager.GetAuthenticationMode();

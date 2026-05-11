@@ -19,6 +19,10 @@
     "Agent Create": {
       "commandName": "Project",
       "commandLineArgs": "agent create ./AgentSamples/math-tutor.json"
+    },
+    "Agent chat": {
+      "commandName": "Project",
+      "commandLineArgs": "agent chat -id doc-u-wan -p proj-AquilaTech"
     }
   }
 }

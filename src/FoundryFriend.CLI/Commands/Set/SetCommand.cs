@@ -25,7 +25,7 @@ internal class SetCommand : CommandBase
         this.Subcommands.Add(new SetShowCommand(sessionManager));
         this.Subcommands.Add(new SetClearCommand(sessionManager));
 
-        _authenticationModeOption = new Option<AuthenticationMode>(name: "--authMode")
+        _authenticationModeOption = new Option<AuthenticationMode>(name: "--auth-mode")
         {
             Description = """
                 The authentication mode.            
