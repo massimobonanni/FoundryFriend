@@ -15,6 +15,7 @@ internal class AgentCommand : CommandBase
         this.Subcommands.Add(new AgentCreateCommand(sessionManager));
         this.Subcommands.Add(new AgentChatCommand(sessionManager));
         this.Subcommands.Add(new AgentListCommand(sessionManager));
+        this.Subcommands.Add(new AgentDeleteCommand(sessionManager));
 
     }
 

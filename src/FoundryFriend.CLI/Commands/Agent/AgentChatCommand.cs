@@ -20,7 +20,7 @@ namespace FoundryFriend.CLI.Commands.Agent;
 internal class AgentChatCommand : CommandBase
 {
     private readonly Option<string> _agentIdOption;
-    private readonly Option<string> _projectName;
+    private readonly Option<string> _projectNameOption;
 
     public AgentChatCommand(ISessionManager sessionManager)
         : base("chat", "Start a new chat with an agent", sessionManager)
@@ -33,13 +33,13 @@ internal class AgentChatCommand : CommandBase
         _agentIdOption.Aliases.Add("-id");
         this.Options.Add(_agentIdOption);
 
-        _projectName = new Option<string>("--project-name")
+        _projectNameOption = new Option<string>("--project-name")
         {
             Description = "The name of the project in Foundry to create the agent in",
             Required = true
         };
-        _projectName.Aliases.Add("-p");
-        this.Options.Add(_projectName);
+        _projectNameOption.Aliases.Add("-p");
+        this.Options.Add(_projectNameOption);
 
         this.SetAction(CommandHandler);
     }
@@ -47,7 +47,7 @@ internal class AgentChatCommand : CommandBase
     private async Task CommandHandler(ParseResult parseResult, CancellationToken cancellationToken)
     {
         var agentId = parseResult.GetValue(_agentIdOption);
-        var projectName = parseResult.GetValue(_projectName);
+        var projectName = parseResult.GetValue(_projectNameOption);
 
         await _sessionManager.LoadSettingsAsync();
 

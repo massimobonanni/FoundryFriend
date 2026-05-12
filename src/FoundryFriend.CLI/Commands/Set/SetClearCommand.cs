@@ -1,4 +1,5 @@
-﻿using FoundryFriend.Core.Interfaces;
+﻿using FoundryFriend.CLI.Utilities;
+using FoundryFriend.Core.Interfaces;
 using System.CommandLine;
 
 namespace FoundryFriend.CLI.Commands.Set;
@@ -31,12 +32,12 @@ internal class SetClearCommand : CommandBase
         var confirmation = System.Console.ReadLine();
         if (confirmation?.ToLower() != "yes" || confirmation?.ToLower() != "y")
         {
-            System.Console.WriteLine("Operation cancelled.");
+            ConsoleUtility.WriteLine("Operation cancelled.", ConsoleColor.Red);
             return;
         }
 
         await this._sessionManager.ClearAllSettingsAsync();
 
-        System.Console.WriteLine("All settings have been cleared successfully.");
+        ConsoleUtility.WriteLine("All settings have been cleared successfully.", ConsoleColor.Green);
     }
 }

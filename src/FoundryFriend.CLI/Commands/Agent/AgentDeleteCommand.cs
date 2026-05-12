@@ -11,13 +11,22 @@ using System.CommandLine;
 
 namespace FoundryFriend.CLI.Commands.Agent;
 
-internal class AgentListCommand : CommandBase
+internal class AgentDeleteCommand : CommandBase
 {
     private readonly Option<string> _projectNameOption;
+    private readonly Option<string> _agentIdOption;
 
-    public AgentListCommand(ISessionManager sessionManager)
-        : base("list", "Display the list of the agent configured", sessionManager)
+    public AgentDeleteCommand(ISessionManager sessionManager)
+        : base("create", "Create an agent from a configuration file", sessionManager)
     {
+        _agentIdOption = new Option<string>("--agent-id")
+        {
+            Description = "The id of the agent to use in the chat",
+            Required = true
+        };
+        _agentIdOption.Aliases.Add("-id");
+        this.Options.Add(_agentIdOption);
+
         _projectNameOption = new Option<string>("--project-name")
         {
             Description = "The name of the project in Foundry to create the agent in",
@@ -31,7 +40,16 @@ internal class AgentListCommand : CommandBase
 
     private async Task CommandHandler(ParseResult parseResult, CancellationToken cancellationToken)
     {
-        var projectName = parseResult.GetValue(_projectNameOption)!;
+        var agentId = parseResult.GetValue(_agentIdOption);
+        var projectName = parseResult.GetValue(_projectNameOption);
+
+        System.Console.WriteLine($"Are you sure you want to delete the agent {agentId}? This action cannot be undone. (yes/no)");
+        var confirmation = System.Console.ReadLine();
+        if (confirmation?.ToLower() != "yes" || confirmation?.ToLower() != "y")
+        {
+            ConsoleUtility.WriteLine("Operation cancelled.", ConsoleColor.Red);
+            return;
+        }
 
         await _sessionManager.LoadSettingsAsync();
 
@@ -52,12 +70,10 @@ internal class AgentListCommand : CommandBase
         AIProjectClient projectClient = null!;
         var authMode = _sessionManager.GetAuthenticationMode();
 
-        ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
-
         if (authMode == AuthenticationMode.Key)
         {
-            ConsoleUtility.WriteLine("Error: The agent creation cannot be run with access key", ConsoleColor.Red);
-            return;
+                ConsoleUtility.WriteLine("Error: The agent creation cannot be run with access key", ConsoleColor.Red);
+                return;
         }
         else
         {
@@ -66,18 +82,17 @@ internal class AgentListCommand : CommandBase
 
         try
         {
-            var agentList = projectClient.AgentAdministrationClient.GetAgentsAsync(
+            ConsoleUtility.WriteLine($"Deleting agent '{agentId}'...", ConsoleColor.Cyan);
+
+            var agentVersion = await projectClient.AgentAdministrationClient.DeleteAgentAsync(
+                agentName: agentId,
                 cancellationToken: cancellationToken);
 
-            ConsoleUtility.WriteLine($"Agents in project '{projectName}':", ConsoleColor.Green);
-            await foreach (var agentInfo in agentList.WithCancellation(cancellationToken))
-            {
-                Console.WriteLine($"\nId: {agentInfo.Id}, Name: {agentInfo.Name}");
-            }
+            ConsoleUtility.WriteLine($"Agent deleted successfully.", ConsoleColor.Green);
         }
         catch (Exception ex)
         {
-            ConsoleUtility.WriteLine($"Error creating agent: {ex.Message}", ConsoleColor.Red);
+            ConsoleUtility.WriteLine($"Error deleting agent: {ex.Message}", ConsoleColor.Red);
         }
     }
 }

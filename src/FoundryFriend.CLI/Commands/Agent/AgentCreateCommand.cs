@@ -14,7 +14,7 @@ namespace FoundryFriend.CLI.Commands.Agent;
 internal class AgentCreateCommand : CommandBase
 {
     private readonly Argument<string> _fileArgument;
-    private readonly Option<string> _projectName;
+    private readonly Option<string> _projectNameOption;
 
     public AgentCreateCommand(ISessionManager sessionManager)
         : base("create", "Create an agent from a configuration file", sessionManager)
@@ -25,11 +25,13 @@ internal class AgentCreateCommand : CommandBase
         };
         this.Arguments.Add(_fileArgument);
 
-        _projectName = new Option<string>("--project-name")
+        _projectNameOption = new Option<string>("--project-name")
         {
             Description = "The name of the project in Foundry to create the agent in",
             Required = true
         };
+        _projectNameOption.Aliases.Add("-p");
+        this.Options.Add(_projectNameOption);
 
         this.SetAction(CommandHandler);
     }
@@ -51,7 +53,7 @@ internal class AgentCreateCommand : CommandBase
             return;
         }
 
-        var projectName = parseResult.GetValue(_projectName)!;
+        var projectName = parseResult.GetValue(_projectNameOption)!;
 
         await _sessionManager.LoadSettingsAsync();
 
