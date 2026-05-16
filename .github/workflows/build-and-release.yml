@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   build-and-test:
@@ -15,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      daily_run: ${{ steps.daily_count.outputs.daily_run }}
     
     steps:
     - name: Checkout code
@@ -25,10 +27,26 @@ jobs:
     - name: Fetch tags
       run: git fetch --tags --force
 
+    - name: Count today's runs
+      id: daily_count
+      run: |
+        TODAY=$(date -u +"%Y-%m-%dT00:00:00Z")
+        WORKFLOW_FILE=$(basename "$(echo "${{ github.workflow_ref }}" | cut -d'@' -f1)")
+        
+        COUNT=$(gh api \
+          "repos/${{ github.repository }}/actions/workflows/${WORKFLOW_FILE}/runs?per_page=100" \
+          --jq "[.workflow_runs[] | select(.created_at >= \"$TODAY\" and .id != ${{ github.run_id }})] | length")
+        
+        DAILY_RUN=$((COUNT + 1))
+        echo "daily_run=$DAILY_RUN" >> $GITHUB_OUTPUT
+        echo "Today's run number: $DAILY_RUN (previous completed: $COUNT)"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
     - name: Update project versions
       id: version
       run: |
-        VERSION=$(date +'%Y.%m.%d').${{ github.run_number }}
+        VERSION=$(date +'%Y.%m.%d').${{ steps.daily_count.outputs.daily_run }}
         echo "Setting version to: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         
@@ -117,18 +135,6 @@ jobs:
       with:
         name: foundryfriend-linux-x64-${{ needs.build-and-test.outputs.version }}
         path: .
-
-    - name: Count today's completed runs
-      run: |
-        TODAY=$(date -u +"%Y-%m-%dT00:00:00Z")
-        
-        COUNT=$(gh api \
-          "repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100" \
-          --jq "[.workflow_runs[] | select(.created_at >= \"$TODAY\" and .id != ${{ github.run_id }})] | length")
-        
-        echo "Esecuzioni precedenti oggi: $COUNT"
-      env:
-        GH_TOKEN: ${{ github.token }}
 
     - name: Get commit info
       id: commit
