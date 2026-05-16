@@ -60,11 +60,11 @@ jobs:
       run: dotnet test src/FoundryFriend.slnx --configuration Release --no-build --verbosity normal
       continue-on-error: false
 
-    - name: Publish PromptusMaximus.CLI for Windows
-      run: dotnet publish src/PromptusMaximus.CLI/PromptusMaximus.CLI.csproj --configuration Release --output ./publish-win -r win-x64 
+    - name: Publish FoundryFriend.CLI for Windows
+      run: dotnet publish src/FoundryFriend.CLI/FoundryFriend.CLI.csproj --configuration Release --output ./publish-win -r win-x64 
 
-    - name: Publish PromptusMaximus.CLI for Linux
-      run: dotnet publish src/PromptusMaximus.CLI/PromptusMaximus.CLI.csproj --configuration Release --output ./publish-linux -r linux-x64 
+    - name: Publish FoundryFriend.CLI for Linux
+      run: dotnet publish src/FoundryFriend.CLI/FoundryFriend.CLI.csproj --configuration Release --output ./publish-linux -r linux-x64 
 
     - name: Create Windows zip archive
       run: |
