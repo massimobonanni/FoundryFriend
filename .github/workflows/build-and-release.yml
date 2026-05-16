@@ -118,6 +118,18 @@ jobs:
         name: foundryfriend-linux-x64-${{ needs.build-and-test.outputs.version }}
         path: .
 
+    - name: Count today's completed runs
+      run: |
+        TODAY=$(date -u +"%Y-%m-%dT00:00:00Z")
+        
+        COUNT=$(gh api \
+          "repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100" \
+          --jq "[.workflow_runs[] | select(.created_at >= \"$TODAY\" and .id != ${{ github.run_id }})] | length")
+        
+        echo "Esecuzioni precedenti oggi: $COUNT"
+      env:
+        GH_TOKEN: ${{ github.token }}
+
     - name: Get commit info
       id: commit
       run: |
