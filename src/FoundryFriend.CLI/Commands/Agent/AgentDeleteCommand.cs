@@ -17,11 +17,11 @@ internal class AgentDeleteCommand : CommandBase
     private readonly Option<string> _agentIdOption;
 
     public AgentDeleteCommand(ISessionManager sessionManager)
-        : base("create", "Create an agent from a configuration file", sessionManager)
+        : base("delete", "Delete an agent from Foundry project", sessionManager)
     {
         _agentIdOption = new Option<string>("--agent-id")
         {
-            Description = "The id of the agent to use in the chat",
+            Description = "The id of the agent to delete",
             Required = true
         };
         _agentIdOption.Aliases.Add("-id");
@@ -29,7 +29,7 @@ internal class AgentDeleteCommand : CommandBase
 
         _projectNameOption = new Option<string>("--project-name")
         {
-            Description = "The name of the project in Foundry to create the agent in",
+            Description = "The name of the project in Foundry contaims the agent",
             Required = true
         };
         _projectNameOption.Aliases.Add("-p");

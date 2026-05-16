@@ -35,7 +35,7 @@ internal class AgentChatCommand : CommandBase
 
         _projectNameOption = new Option<string>("--project-name")
         {
-            Description = "The name of the project in Foundry to create the agent in",
+            Description = "The name of the project in Foundry contains the agent",
             Required = true
         };
         _projectNameOption.Aliases.Add("-p");

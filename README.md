@@ -72,6 +72,38 @@ azd down
 
 ---
 
+### Set up the `foundryfriend` alias (optional)
+
+`Manage-ProfileCommands.ps1` is a PowerShell helper script that registers a `foundryfriend` alias in your PowerShell profile, pointing to the compiled CLI executable. This lets you run `foundryfriend` from any directory without specifying the full path to the binary.
+
+> **Note:** Build the project first (`dotnet build`) so the executable is available at `src\FoundryFriend.CLI\bin\Debug\net10.0\foundryfriend.exe`.
+
+**Add the alias to your profile**
+
+```powershell
+.\Manage-ProfileCommands.ps1
+```
+
+**Add without confirmation prompt**
+
+```powershell
+.\Manage-ProfileCommands.ps1 -Force
+```
+
+**Remove the alias from your profile**
+
+```powershell
+.\Manage-ProfileCommands.ps1 -Remove
+```
+
+After adding the alias, reload your profile or restart PowerShell:
+
+```powershell
+. $PROFILE
+```
+
+---
+
 ## CLI Commands
 
 All commands follow the pattern:
