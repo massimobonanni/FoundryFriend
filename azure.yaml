@@ -4,7 +4,7 @@ name: foundryfriend
 infra:
   provider: bicep
   path: ./infra
-services:
+#services:
   # Define application services here as the project grows
   # Example:
   # api:
