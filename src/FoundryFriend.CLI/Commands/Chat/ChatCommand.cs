@@ -1,6 +1,4 @@
 ﻿using Azure;
-using Azure.AI.Inference;
-using Azure.Identity;
 using FoundryFriend.CLI.Utilities;
 using FoundryFriend.Core.Entities;
 using FoundryFriend.Core.Interfaces;
@@ -9,21 +7,26 @@ using System.CommandLine;
 namespace FoundryFriend.CLI.Commands.Chat;
 
 /// <summary>
-/// Represents the main 'set' command that provides subcommands for configuring session settings.
-/// This command serves as a container for various configuration options including credentials, model selection, and language preferences.
+/// Starts an interactive multi-turn chat with a specific model deployment in Azure AI Foundry.
+/// The command handler is thin — it parses input, validates configuration, and delegates
+/// all chat logic to <see cref="IChatService"/>.
 /// </summary>
 internal class ChatCommand : CommandBase
 {
+    private readonly IChatService _chatService;
     private readonly Option<string> _systemMessageOption;
     private readonly Option<string> _modelDeployNameOption;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SetCommand"/> class with the specified session manager.
+    /// Initializes a new instance of the <see cref="ChatCommand"/> class.
     /// </summary>
-    /// <param name="sessionManager">The session manager instance used to manage configuration settings across all subcommands.</param>
-    public ChatCommand(ISessionManager sessionManager) :
+    /// <param name="sessionManager">The session manager for configuration access.</param>
+    /// <param name="chatService">The chat service that handles model communication.</param>
+    public ChatCommand(ISessionManager sessionManager, IChatService chatService) :
         base("chat", "Start a chat with a specific model deployment in Foundry", sessionManager)
     {
+        _chatService = chatService;
+
         _modelDeployNameOption = new Option<string>(name: "--model-deployment")
         {
             Description = "The model deployment name in Azure Foundry",
@@ -48,9 +51,9 @@ internal class ChatCommand : CommandBase
         var modelName = parseResult.GetValue(_modelDeployNameOption);
         var systemMessage = parseResult.GetValue(_systemMessageOption);
 
+        // 1. Load and validate session configuration
         await _sessionManager.LoadSettingsAsync();
 
-        // Validate session configuration
         var endpoint = _sessionManager.GetEndpoint();
         if (string.IsNullOrWhiteSpace(endpoint))
         {
@@ -58,45 +61,26 @@ internal class ChatCommand : CommandBase
             return;
         }
 
-        if (!endpoint.EndsWith("/"))
-        {
-            endpoint += "/";
-        }
-        endpoint += "models";
-
-        // Build the inference client based on authentication mode
-        ChatCompletionsClient client;
         var authMode = _sessionManager.GetAuthenticationMode();
+        string? accessKey = null;
 
         if (authMode == AuthenticationMode.Key)
         {
-            var accessKey = _sessionManager.GetAccessKey();
+            accessKey = _sessionManager.GetAccessKey();
             if (string.IsNullOrWhiteSpace(accessKey))
             {
                 ConsoleUtility.WriteLine("Error: access key not configured. Use 'set' command to configure it.", ConsoleColor.Red);
                 return;
             }
-            client = new ChatCompletionsClient(
-                new Uri(endpoint),
-                new AzureKeyCredential(accessKey));
-        }
-        else
-        {
-            client = new ChatCompletionsClient(
-                new Uri(endpoint),
-                new DefaultAzureCredential());
         }
 
-        // Build the conversation history
-        var messages = new List<ChatRequestMessage>();
-
-        if (!string.IsNullOrWhiteSpace(systemMessage))
-            messages.Add(new ChatRequestSystemMessage(systemMessage));
+        // 2. Initialize the chat service
+        _chatService.Initialize(endpoint, authMode, accessKey, modelName!, systemMessage);
 
         ConsoleUtility.WriteLine($"Chat started with model '{modelName}'. Type 'exit' or 'quit' to stop.", ConsoleColor.Green);
         ConsoleUtility.WriteLine(new string('-', 50), ConsoleColor.Green);
 
-        // Multi-turn chat loop
+        // 3. Multi-turn chat loop — only console I/O here
         while (!cancellationToken.IsCancellationRequested)
         {
             ConsoleUtility.Write("You: ", ConsoleColor.White);
@@ -113,34 +97,16 @@ internal class ChatCommand : CommandBase
                 break;
             }
 
-            messages.Add(new ChatRequestUserMessage(userInput));
-
             try
             {
-                var options = new ChatCompletionsOptions(messages)
-                {
-                    Model = modelName
-                };
-
                 ConsoleUtility.Write("Assistant: ", ConsoleColor.Yellow);
 
-                // Streaming response
-                var streamingResponse = await client.CompleteStreamingAsync(options, cancellationToken);
-
-                var assistantReply = new System.Text.StringBuilder();
-                await foreach (var update in streamingResponse.WithCancellation(cancellationToken))
+                await foreach (var chunk in _chatService.SendMessageStreamingAsync(userInput, cancellationToken))
                 {
-                    if (!string.IsNullOrEmpty(update.ContentUpdate))
-                    {
-                        ConsoleUtility.Write(update.ContentUpdate, ConsoleColor.Yellow);
-                        assistantReply.Append(update.ContentUpdate);
-                    }
+                    ConsoleUtility.Write(chunk, ConsoleColor.Yellow);
                 }
 
                 ConsoleUtility.WriteLine();
-
-                // Add assistant reply to history for multi-turn context
-                messages.Add(new ChatRequestAssistantMessage(assistantReply.ToString()));
             }
             catch (RequestFailedException ex)
             {

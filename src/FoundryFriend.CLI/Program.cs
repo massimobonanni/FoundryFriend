@@ -1,4 +1,5 @@
-﻿using FoundryFriend.CLI.Utilities;
+using FoundryFriend.CLI.Services;
+using FoundryFriend.CLI.Utilities;
 using FoundryFriend.Core.Configuration;
 using FoundryFriend.Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ ConsoleUtility.WriteApplicationBanner();
 /// </summary>
 var serviceCollection = new ServiceCollection();
 serviceCollection.TryAddSingleton<ISessionManager, SessionManager>();
+serviceCollection.TryAddTransient<IChatService, ChatService>();
 
 // Build the service provider to resolve dependencies
 var serviceProvider = serviceCollection.BuildServiceProvider();

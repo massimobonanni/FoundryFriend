@@ -13,7 +13,7 @@ internal class RootCommand : System.CommandLine.RootCommand
         this.Description = "The command-line interface for Foundry demos.";
 
         this.Subcommands.Add(new SetCommand(serviceProvider.GetSessionManager()));
-        this.Subcommands.Add(new ChatCommand(serviceProvider.GetSessionManager()));
+        this.Subcommands.Add(new ChatCommand(serviceProvider.GetSessionManager(), serviceProvider.GetChatService()));
         this.Subcommands.Add(new AgentCommand(serviceProvider.GetSessionManager()));
 
         for (int i = 0; i < this.Options.Count; i++)
