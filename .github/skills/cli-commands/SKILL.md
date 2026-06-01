@@ -238,7 +238,21 @@ Available styles: `Spinner`, `Dots`, `Arrow`, `Braille`.
 
 ---
 
-## RULE 10 — Dependency Injection
+## RULE 10 — Command Logic
+
+The logic of each command should be in a **service class** that implements an interface. The command handler should be thin, responsible only for:
+1. Parsing input
+2. Validating configuration
+3. Calling the service method
+4. Outputting results
+
+Interfaces go in `FoundryFriend.Core/Interfaces/`, implementations in Core or CLI depending on scope.
+
+Service class should be injected in the command constructor via DI, not instantiated directly.
+
+---
+
+## RULE 11 — Dependency Injection
 
 Services are registered in `Program.cs` as **singletons**:
 
