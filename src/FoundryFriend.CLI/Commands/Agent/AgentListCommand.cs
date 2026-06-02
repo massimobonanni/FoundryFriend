@@ -1,23 +1,25 @@
-﻿using Azure;
-using Azure.AI.Projects;
-using Azure.AI.Projects.Agents;
-using Azure.Identity;
-using FoundryFriend.CLI.Utilities;
-using FoundryFriend.Core.Configuration;   // AgentConfiguration
+﻿using FoundryFriend.CLI.Utilities;
 using FoundryFriend.Core.Entities;
 using FoundryFriend.Core.Interfaces;
-using OpenAI.Responses;
 using System.CommandLine;
 
 namespace FoundryFriend.CLI.Commands.Agent;
 
+/// <summary>
+/// Lists all agents in an Azure AI Foundry project.
+/// The command handler is thin — it parses input, validates configuration, and delegates
+/// the listing to <see cref="IAgentService"/>.
+/// </summary>
 internal class AgentListCommand : CommandBase
 {
+    private readonly IAgentService _agentService;
     private readonly Option<string> _projectNameOption;
 
-    public AgentListCommand(ISessionManager sessionManager)
+    public AgentListCommand(ISessionManager sessionManager, IAgentService agentService)
         : base("list", "Display the list of the agent configured", sessionManager)
     {
+        _agentService = agentService;
+
         _projectNameOption = new Option<string>("--project-name")
         {
             Description = "The name of the project in Foundry",
@@ -33,51 +35,39 @@ internal class AgentListCommand : CommandBase
     {
         var projectName = parseResult.GetValue(_projectNameOption)!;
 
+        // 1. Load and validate session configuration
         await _sessionManager.LoadSettingsAsync();
 
-        var projectEndpoint = _sessionManager.GetEndpoint();
-        if (string.IsNullOrWhiteSpace(projectEndpoint))
+        var endpoint = _sessionManager.GetEndpoint();
+        if (string.IsNullOrWhiteSpace(endpoint))
         {
             ConsoleUtility.WriteLine("Error: endpoint not configured. Use 'set' command to configure it.", ConsoleColor.Red);
             return;
         }
 
-        // add string to the endpoint
-        if (!projectEndpoint.EndsWith("/"))
-        {
-            projectEndpoint += "/";
-        }
-        projectEndpoint += $"api/projects/{projectName}";
-
-        AIProjectClient projectClient = null!;
         var authMode = _sessionManager.GetAuthenticationMode();
-
-        ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
-
         if (authMode == AuthenticationMode.Key)
         {
-            ConsoleUtility.WriteLine("Error: The agent creation cannot be run with access key", ConsoleColor.Red);
+            ConsoleUtility.WriteLine("Error: Agent listing requires Identity authentication.", ConsoleColor.Red);
             return;
         }
-        else
-        {
-            projectClient = new AIProjectClient(new Uri(projectEndpoint), new DefaultAzureCredential());
-        }
+
+        // 2. Initialize the service and list agents
+        ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
+        _agentService.Initialize(endpoint, projectName);
 
         try
         {
-            var agentList = projectClient.AgentAdministrationClient.GetAgentsAsync(
-                cancellationToken: cancellationToken);
-
             ConsoleUtility.WriteLine($"Agents in project '{projectName}':", ConsoleColor.Green);
-            await foreach (var agentInfo in agentList.WithCancellation(cancellationToken))
+
+            await foreach (var agentInfo in _agentService.ListAgentsAsync(cancellationToken))
             {
-                Console.WriteLine($"\nId: {agentInfo.Id}, Name: {agentInfo.Name}");
+                ConsoleUtility.WriteLine($"\nId: {agentInfo.Id}, Name: {agentInfo.Name}", ConsoleColor.White);
             }
         }
         catch (Exception ex)
         {
-            ConsoleUtility.WriteLine($"Error creating agent: {ex.Message}", ConsoleColor.Red);
+            ConsoleUtility.WriteLine($"Error listing agents: {ex.Message}", ConsoleColor.Red);
         }
     }
 }

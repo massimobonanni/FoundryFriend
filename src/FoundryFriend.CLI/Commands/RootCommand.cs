@@ -14,7 +14,7 @@ internal class RootCommand : System.CommandLine.RootCommand
 
         this.Subcommands.Add(new SetCommand(serviceProvider.GetSessionManager()));
         this.Subcommands.Add(new ChatCommand(serviceProvider.GetSessionManager(), serviceProvider.GetChatService()));
-        this.Subcommands.Add(new AgentCommand(serviceProvider.GetSessionManager(), serviceProvider.GetAgentChatService()));
+        this.Subcommands.Add(new AgentCommand(serviceProvider.GetSessionManager(), serviceProvider.GetAgentChatService(), serviceProvider.GetAgentService()));
 
         for (int i = 0; i < this.Options.Count; i++)
         {

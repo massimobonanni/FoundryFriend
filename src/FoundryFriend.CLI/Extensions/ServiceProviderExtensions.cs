@@ -39,4 +39,15 @@ internal static class ServiceProviderExtensions
     {
         return provider.GetRequiredService<IAgentChatService>();
     }
+
+    /// <summary>
+    /// Retrieves the registered <see cref="IAgentService"/> service from the service provider.
+    /// </summary>
+    /// <param name="provider">The service provider to retrieve the service from.</param>
+    /// <returns>A new <see cref="IAgentService"/> instance (transient).</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the <see cref="IAgentService"/> service is not registered in the service provider.</exception>
+    public static IAgentService GetAgentService(this ServiceProvider provider)
+    {
+        return provider.GetRequiredService<IAgentService>();
+    }
 }

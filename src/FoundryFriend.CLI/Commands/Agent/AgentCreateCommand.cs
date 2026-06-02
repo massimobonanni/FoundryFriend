@@ -1,24 +1,27 @@
-﻿using Azure;
-using Azure.AI.Projects;
-using Azure.AI.Projects.Agents;
-using Azure.Identity;
-using FoundryFriend.CLI.Utilities;
-using FoundryFriend.Core.Configuration;   // AgentConfiguration
+﻿using FoundryFriend.CLI.Utilities;
+using FoundryFriend.Core.Configuration;
 using FoundryFriend.Core.Entities;
 using FoundryFriend.Core.Interfaces;
-using OpenAI.Responses;
 using System.CommandLine;
 
 namespace FoundryFriend.CLI.Commands.Agent;
 
+/// <summary>
+/// Creates an agent in Azure AI Foundry from a JSON configuration file.
+/// The command handler is thin — it parses input, validates configuration, and delegates
+/// all agent creation logic to <see cref="IAgentService"/>.
+/// </summary>
 internal class AgentCreateCommand : CommandBase
 {
+    private readonly IAgentService _agentService;
     private readonly Argument<string> _fileArgument;
     private readonly Option<string> _projectNameOption;
 
-    public AgentCreateCommand(ISessionManager sessionManager)
+    public AgentCreateCommand(ISessionManager sessionManager, IAgentService agentService)
         : base("create", "Create an agent from a configuration file", sessionManager)
     {
+        _agentService = agentService;
+
         _fileArgument = new Argument<string>("file")
         {
             Description = "Path to the agent configuration JSON file"
@@ -55,57 +58,37 @@ internal class AgentCreateCommand : CommandBase
 
         var projectName = parseResult.GetValue(_projectNameOption)!;
 
+        // 1. Load and validate session configuration
         await _sessionManager.LoadSettingsAsync();
 
-        var projectEndpoint = _sessionManager.GetEndpoint();
-        if (string.IsNullOrWhiteSpace(projectEndpoint))
+        var endpoint = _sessionManager.GetEndpoint();
+        if (string.IsNullOrWhiteSpace(endpoint))
         {
             ConsoleUtility.WriteLine("Error: endpoint not configured. Use 'set' command to configure it.", ConsoleColor.Red);
             return;
         }
 
-        // add string to the endpoint
-        if (!projectEndpoint.EndsWith("/"))
-        {
-            projectEndpoint += "/";
-        }
-        projectEndpoint += $"api/projects/{projectName}";
-
-        AIProjectClient projectClient = null!;
         var authMode = _sessionManager.GetAuthenticationMode();
-
         if (authMode == AuthenticationMode.Key)
         {
-                ConsoleUtility.WriteLine("Error: The agent creation cannot be run with access key", ConsoleColor.Red);
-                return;
+            ConsoleUtility.WriteLine("Error: Agent creation requires Identity authentication.", ConsoleColor.Red);
+            return;
         }
-        else
-        {
-            projectClient = new AIProjectClient(new Uri(projectEndpoint), new DefaultAzureCredential());
-        }
+
+        // 2. Initialize the service and create the agent
+        _agentService.Initialize(endpoint, projectName);
 
         try
         {
-            
-            ProjectsAgentDefinition agentDefinition = new DeclarativeAgentDefinition(config.ModelDeploymentName)
-            { 
-                Instructions = config.GetInstructionsAsString(),
-            };
-
             ConsoleUtility.WriteLine($"Creating agent '{config.Name}'...", ConsoleColor.Cyan);
 
-            var agentVersion = await projectClient.AgentAdministrationClient.CreateAgentVersionAsync(
-                agentName: config.Id,
-                options: new (agentDefinition),
-                cancellationToken: cancellationToken);
+            var agentVersion = await _agentService.CreateAgentAsync(
+                config.Id, config.ModelDeploymentName, config.GetInstructionsAsString(), cancellationToken);
 
             ConsoleUtility.WriteLine($"Agent created successfully.", ConsoleColor.Green);
-            ConsoleUtility.WriteLine($"  Id      : {agentVersion.Value.Id}");
-            ConsoleUtility.WriteLine($"  Name    : {agentVersion.Value.Name}");
-            ConsoleUtility.WriteLine($"  Version : {agentVersion.Value.Version}");
-
-            //if (config.McpServers is { Count: > 0 })
-            //    ConsoleUtility.WriteLine($"  MCP servers: {string.Join(", ", config.McpServers.Select(m => m.ServerLabel))}");
+            ConsoleUtility.WriteLine($"  Id      : {agentVersion.Id}");
+            ConsoleUtility.WriteLine($"  Name    : {agentVersion.Name}");
+            ConsoleUtility.WriteLine($"  Version : {agentVersion.Version}");
         }
         catch (Exception ex)
         {
