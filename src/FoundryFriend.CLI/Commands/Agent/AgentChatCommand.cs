@@ -68,7 +68,6 @@ internal class AgentChatCommand : CommandBase
         AIProjectClient projectClient = null!;
         var authMode = _sessionManager.GetAuthenticationMode();
 
-
         ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
 
         if (authMode == AuthenticationMode.Key)
@@ -82,14 +81,17 @@ internal class AgentChatCommand : CommandBase
         }
 
         // Create a conversation for multi-turn chat
-        ProjectConversation conversation = projectClient.ProjectOpenAIClient.GetProjectConversationsClient().CreateProjectConversation();
+        ProjectConversation conversation = await projectClient.ProjectOpenAIClient
+            .GetProjectConversationsClient()
+            .CreateProjectConversationAsync();
 
         // Chat with the agent to answer questions
-        ProjectResponsesClient responsesClient = projectClient.ProjectOpenAIClient.GetProjectResponsesClientForAgent(
-            defaultAgent: agentId,
-            defaultConversationId: conversation.Id);
+        ProjectResponsesClient responsesClient = projectClient.ProjectOpenAIClient
+            .GetProjectResponsesClientForAgent(
+                defaultAgent: agentId,
+                defaultConversationId: conversation.Id);
 
-        ConsoleUtility.WriteLine($"Chat started with agent '{agentId}'. Type 'exit' or 'quit' to stop.", ConsoleColor.Green);
+        ConsoleUtility.WriteLine($"Conversation {conversation.Id} started with agent '{agentId}'. Type 'exit' or 'quit' to stop.", ConsoleColor.Green);
         ConsoleUtility.WriteLine(new string('-', 50), ConsoleColor.Green);
         ConsoleUtility.WriteLine();
 
