@@ -15,6 +15,7 @@ ConsoleUtility.WriteApplicationBanner();
 var serviceCollection = new ServiceCollection();
 serviceCollection.TryAddSingleton<ISessionManager, SessionManager>();
 serviceCollection.TryAddTransient<IChatService, ChatService>();
+serviceCollection.TryAddTransient<IAgentChatService, AgentChatService>();
 
 // Build the service provider to resolve dependencies
 var serviceProvider = serviceCollection.BuildServiceProvider();
