@@ -20,6 +20,7 @@ FoundryFriend/
     │   ├── Commands/                 # Command implementations
     │   │   ├── Agent/                # Agent management commands
     │   │   ├── Chat/                 # Chat command
+    │   │   ├── Login/                # Azure login command
     │   │   └── Set/                  # Configuration commands
     │   ├── AgentSamples/             # Sample agent configuration files
     │   ├── Extensions/
@@ -110,6 +111,33 @@ All commands follow the pattern:
 
 ```
 foundryfriend <command> [subcommand] [options]
+```
+
+---
+
+### `login` — Log in to Azure
+
+Authenticates with Azure by delegating to `az login`. Requires the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) to be installed and on `PATH`. Use this before running any command with `--auth-mode Identity`.
+
+| Option | Alias | Description | Required |
+|---|---|---|---|
+| `--tenant` | `-t` | Azure AD tenant ID or domain name to log in to | No |
+| `--device-code` | `-dc` | Use device code flow (headless or remote environments) | No |
+
+**Examples**
+
+```bash
+# Interactive login (opens browser)
+foundryfriend login
+
+# Log in to a specific tenant
+foundryfriend login --tenant contoso.com
+
+# Device code flow (CI/headless environments)
+foundryfriend login --device-code
+
+# Combine both
+foundryfriend login -t 00000000-0000-0000-0000-000000000000 -dc
 ```
 
 ---
@@ -277,7 +305,7 @@ foundryfriend agent delete --agent-id asst_abc123 --project-name my-foundry-proj
 
 | Mode | Description | Prerequisites |
 |---|---|---|
-| `Identity` | Uses Azure identity (DefaultAzureCredential) | Run `az login` or `azd auth login` before use |
+| `Identity` | Uses Azure identity (DefaultAzureCredential) | Run `foundryfriend login`, `az login`, or `azd auth login` before use |
 | `Key` | Uses an Foundry access key | Only supported for `chat`; not available for `agent` commands |
 
 ## License

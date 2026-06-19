@@ -50,4 +50,15 @@ internal static class ServiceProviderExtensions
     {
         return provider.GetRequiredService<IAgentService>();
     }
+
+    /// <summary>
+    /// Retrieves the registered <see cref="IAzCliService"/> service from the service provider.
+    /// </summary>
+    /// <param name="provider">The service provider to retrieve the service from.</param>
+    /// <returns>The registered <see cref="IAzCliService"/> implementation.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the <see cref="IAzCliService"/> service is not registered in the service provider.</exception>
+    public static IAzCliService GetAzCliService(this ServiceProvider provider)
+    {
+        return provider.GetRequiredService<IAzCliService>();
+    }
 }

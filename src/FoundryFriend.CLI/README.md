@@ -18,16 +18,19 @@ FoundryFriend.CLI/
 │   │   └── SetClearCommand.cs  # Clears all settings
 │   ├── Chat/                   # Direct model deployment chat
 │   │   └── ChatCommand.cs      # Interactive multi-turn chat via IChatService
-│   └── Agent/                  # Agent management
-│       ├── AgentCommand.cs     # Parent group command
-│       ├── AgentCreateCommand.cs   # Create agent from JSON config
-│       ├── AgentListCommand.cs     # List agents in a project
-│       ├── AgentChatCommand.cs     # Interactive chat with an agent
-│       └── AgentDeleteCommand.cs   # Delete an agent
+│   ├── Agent/                  # Agent management
+│   │   ├── AgentCommand.cs     # Parent group command
+│   │   ├── AgentCreateCommand.cs   # Create agent from JSON config
+│   │   ├── AgentListCommand.cs     # List agents in a project
+│   │   ├── AgentChatCommand.cs     # Interactive chat with an agent
+│   │   └── AgentDeleteCommand.cs   # Delete an agent
+│   └── Login/                  # Azure authentication
+│       └── LoginCommand.cs     # Delegates to 'az login' via IAzCliService
 ├── Services/                   # Service implementations (injected into commands)
 │   ├── ChatService.cs          # IChatService — model deployment chat via Azure AI Inference
 │   ├── AgentChatService.cs     # IAgentChatService — agent conversation via Project Responses API
-│   └── AgentService.cs         # IAgentService — agent CRUD via Agent Administration API
+│   ├── AgentService.cs         # IAgentService — agent CRUD via Agent Administration API
+│   └── AzCliService.cs         # IAzCliService — runs Azure CLI commands as external processes
 ├── Extensions/
 │   ├── ServiceProviderExtensions.cs   # Typed service resolution helpers
 │   ├── ParseResultExtensions.cs       # TryGetValue for optional options
@@ -71,17 +74,41 @@ dotnet run -- <command> [options]
 ### Quick start
 
 ```bash
-# 1. Configure the Foundry endpoint
+# 1. Log in to Azure (opens browser for interactive authentication)
+dotnet run -- login
+
+# 2. Log in to a specific tenant using device code (headless environments)
+dotnet run -- login --tenant contoso.com --device-code
+
+# 3. Configure the Foundry endpoint
 dotnet run -- set --endpoint https://<your-foundry-endpoint> --auth-mode Identity
 
-# 2. Chat with a model deployment
+# 4. Chat with a model deployment
 dotnet run -- chat --model-deployment gpt-4.1
 
-# 3. List agents in a project
+# 5. List agents in a project
 dotnet run -- agent list --project-name my-project
 
-# 4. Chat with an agent
+# 6. Chat with an agent
 dotnet run -- agent chat --agent-id asst_abc123 --project-name my-project
+```
+
+## Commands Reference
+
+### `login`
+
+Log in to Azure by delegating to `az login`. Requires the [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) to be installed and available on `PATH`.
+
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `--tenant <id\|domain>` | `-t` | Azure AD tenant ID or domain name to log in to |
+| `--device-code` | `-dc` | Use device code flow (headless / remote environments) |
+
+```bash
+foundryfriend login
+foundryfriend login --tenant contoso.com
+foundryfriend login --device-code
+foundryfriend login -t 00000000-0000-0000-0000-000000000000 -dc
 ```
 
 ## Adding a New Command

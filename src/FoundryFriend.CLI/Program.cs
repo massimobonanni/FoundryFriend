@@ -17,6 +17,7 @@ serviceCollection.TryAddSingleton<ISessionManager, SessionManager>();
 serviceCollection.TryAddTransient<IChatService, ChatService>();
 serviceCollection.TryAddTransient<IAgentChatService, AgentChatService>();
 serviceCollection.TryAddTransient<IAgentService, AgentService>();
+serviceCollection.TryAddTransient<IAzCliService, AzCliService>();
 
 // Build the service provider to resolve dependencies
 var serviceProvider = serviceCollection.BuildServiceProvider();
