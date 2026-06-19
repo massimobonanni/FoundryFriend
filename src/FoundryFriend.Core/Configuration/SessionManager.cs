@@ -193,9 +193,16 @@ public class SessionManager : ISessionManager
     /// </summary>
     /// <param name="key">The secret key.</param>
     /// <param name="value">The secret value.</param>
-    public void SetSecret(string key, string value)
+    public void SetSecret(string key, string? value)
     {
-        _currentSettings.Secrets[key] = value;
+        if (value != null)
+        {
+            _currentSettings.Secrets[key] = value;
+        }
+        else if (_currentSettings.Secrets.ContainsKey(key))
+        {
+            _currentSettings.Secrets.Remove(key);
+        }
     }
 
     /// <summary>
