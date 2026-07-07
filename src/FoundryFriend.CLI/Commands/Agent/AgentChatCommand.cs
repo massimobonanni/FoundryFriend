@@ -16,6 +16,7 @@ internal class AgentChatCommand : CommandBase
     private readonly IAgentChatService _agentChatService;
     private readonly Option<string> _agentIdOption;
     private readonly Option<string> _projectNameOption;
+    private readonly Option<bool> _fullLogOption;
 
     public AgentChatCommand(ISessionManager sessionManager, IAgentChatService agentChatService)
         : base("chat", "Start a new chat with an agent", sessionManager)
@@ -38,6 +39,14 @@ internal class AgentChatCommand : CommandBase
         _projectNameOption.Aliases.Add("-p");
         this.Options.Add(_projectNameOption);
 
+        _fullLogOption = new Option<bool>("--full-log")
+        {
+            Description = "Enable full logging for the chat session",
+            DefaultValueFactory = _ => false
+        };
+        _fullLogOption.Aliases.Add("-fl");
+        this.Options.Add(_fullLogOption);
+
         this.SetAction(CommandHandler);
     }
 
@@ -45,6 +54,7 @@ internal class AgentChatCommand : CommandBase
     {
         var agentId = parseResult.GetValue(_agentIdOption);
         var projectName = parseResult.GetValue(_projectNameOption);
+        var fullLog = parseResult.GetValue(_fullLogOption);
 
         // 1. Load and validate session configuration
         await _sessionManager.LoadSettingsAsync();
@@ -96,14 +106,24 @@ internal class AgentChatCommand : CommandBase
 
             try
             {
-                ConsoleUtility.Write("Assistant: ", ConsoleColor.Yellow);
-
-                await foreach (var chunk in _agentChatService.SendMessageStreamingAsync(userInput, cancellationToken))
+                var outputText=new List<string>();
+            
+                await foreach (var chunk in _agentChatService.SendMessageStreamingAsync(userInput, fullLog, cancellationToken))
                 {
-                    ConsoleUtility.Write(chunk, ConsoleColor.Yellow);
+                    if (chunk.UpdateType.Equals("StreamingResponseOutputTextDeltaUpdate", StringComparison.OrdinalIgnoreCase))
+                    {
+                        outputText.Add(chunk.Text);
+                    }
+                    else if (fullLog && !string.IsNullOrWhiteSpace(chunk.Text))
+                    {
+                        ConsoleUtility.WriteLine($"[{chunk.UpdateType}] {chunk.Text}", ConsoleColor.Magenta);
+                    }
                 }
 
+                ConsoleUtility.Write("Assistant: ", ConsoleColor.Yellow);
+                outputText.ForEach(text => ConsoleUtility.Write(text, ConsoleColor.Yellow));
                 ConsoleUtility.WriteLine();
+
             }
             catch (RequestFailedException ex)
             {

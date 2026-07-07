@@ -1,4 +1,6 @@
-﻿namespace FoundryFriend.Core.Interfaces;
+﻿using FoundryFriend.Core.Entities;
+
+namespace FoundryFriend.Core.Interfaces;
 
 /// <summary>
 /// Defines the contract for agent-based chat operations against an Azure AI Foundry agent.
@@ -20,12 +22,13 @@ public interface IAgentChatService
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sends a user message to the agent and streams the response as an asynchronous sequence of text chunks.
+    /// Sends a user message to the agent and streams the response as an asynchronous sequence of chunks.
     /// </summary>
     /// <param name="userMessage">The user's input message.</param>
+    /// <param name="extendedLog">When <c>true</c>, yields all streaming update types; otherwise only text deltas and completion chunks are returned.</param>
     /// <param name="cancellationToken">A token to cancel the streaming operation.</param>
-    /// <returns>An asynchronous enumerable of text chunks forming the agent's response.</returns>
-    IAsyncEnumerable<string> SendMessageStreamingAsync(string userMessage, CancellationToken cancellationToken);
+    /// <returns>An asynchronous enumerable of <see cref="StreamingResponseChunk"/> forming the agent's response.</returns>
+    IAsyncEnumerable<StreamingResponseChunk> SendMessageStreamingAsync(string userMessage, bool extendedLog, CancellationToken cancellationToken);
 
     /// <summary>
     /// Resets the service state, clearing the conversation and client references.

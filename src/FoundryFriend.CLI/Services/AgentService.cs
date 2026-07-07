@@ -33,7 +33,7 @@ internal class AgentService : IAgentService
 
         var agentDefinition = new DeclarativeAgentDefinition(modelDeploymentName)
         {
-            Instructions = instructions,
+            Instructions = instructions
         };
 
         var agentVersion = await _projectClient!.AgentAdministrationClient.CreateAgentVersionAsync(
