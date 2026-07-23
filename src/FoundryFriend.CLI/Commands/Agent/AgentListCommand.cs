@@ -45,13 +45,6 @@ internal class AgentListCommand : CommandBase
             return;
         }
 
-        var authMode = _sessionManager.GetAuthenticationMode();
-        if (authMode == AuthenticationMode.Key)
-        {
-            ConsoleUtility.WriteLine("Error: Agent listing requires Identity authentication.", ConsoleColor.Red);
-            return;
-        }
-
         // 2. Initialize the service and list agents
         ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
         _agentService.Initialize(endpoint, projectName);

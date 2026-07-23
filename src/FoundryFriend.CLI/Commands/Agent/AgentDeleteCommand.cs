@@ -64,13 +64,6 @@ internal class AgentDeleteCommand : CommandBase
             return;
         }
 
-        var authMode = _sessionManager.GetAuthenticationMode();
-        if (authMode == AuthenticationMode.Key)
-        {
-            ConsoleUtility.WriteLine("Error: Agent deletion requires Identity authentication.", ConsoleColor.Red);
-            return;
-        }
-
         // 3. Initialize the service and delete the agent
         _agentService.Initialize(endpoint, projectName!);
 

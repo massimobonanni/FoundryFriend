@@ -32,8 +32,6 @@ internal class SetShowCommand : CommandBase
     {
         await this._sessionManager.LoadSettingsAsync();
 
-        var authMode = this._sessionManager.GetAuthenticationMode();
-        ConsoleUtility.WriteLine($"Authentication Mode : {authMode}");
         var foundryEndpoint=this._sessionManager.GetEndpoint();
         if (string.IsNullOrEmpty(foundryEndpoint))
         {
@@ -44,18 +42,6 @@ internal class SetShowCommand : CommandBase
             ConsoleUtility.WriteLine($"Foundry endpoint: {foundryEndpoint}");
         }
 
-        if (authMode == Core.Entities.AuthenticationMode.Key)
-        {
-            var accessKey= this._sessionManager.GetAccessKey();
-            if (string.IsNullOrEmpty(accessKey))
-            {
-                ConsoleUtility.WriteLine("Access Key : Not Set");
-            }
-            else
-            {
-                ConsoleUtility.WriteLine($"Access Key : {accessKey.Mask()}");
-            }
-        }
         ConsoleUtility.WriteLine();
     }
 }

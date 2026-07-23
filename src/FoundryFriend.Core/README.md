@@ -10,13 +10,15 @@ FoundryFriend.Core/
 │   ├── ISessionManager.cs      # Session settings persistence and secret management
 │   ├── IChatService.cs         # Model deployment chat operations (streaming)
 │   ├── IAgentChatService.cs    # Agent conversation operations (streaming)
-│   └── IAgentService.cs        # Agent CRUD operations (create, list, delete)
+│   ├── IAgentService.cs        # Agent CRUD operations (create, list, delete)
+│   └── IAzCliService.cs        # Runs Azure CLI commands as external processes
 ├── Entities/                   # Shared data types and enums
 │   ├── AuthenticationMode.cs   # Identity vs Key authentication enum
-│   └── AgentInfo.cs            # AgentInfo and AgentVersionInfo DTOs
+│   ├── AgentInfo.cs            # AgentInfo and AgentVersionInfo DTOs
+│   └── StreamingResponseChunk.cs  # A single chunk from a streaming chat/agent response
 ├── Configuration/              # Settings and configuration models
 │   ├── SessionManager.cs       # ISessionManager implementation — file-based settings with encrypted secrets
-│   └── AgentConfiguration.cs   # JSON-serializable agent definition (loaded from config files)
+│   └── SessionSettings.cs      # Session settings model (endpoint, auth mode, access key, custom settings, secrets)
 ├── Security/                   # Platform-specific secret protection
 │   ├── IProtectedDataProvider.cs           # Abstraction for data encryption/decryption
 │   ├── WindowsProtectedDataProvider.cs     # Windows DPAPI implementation
@@ -38,6 +40,7 @@ The interfaces define the service contracts that the CLI project implements. Thi
 | `IChatService` | Initialize a chat client for a model deployment, send messages with streaming responses, reset conversation history. |
 | `IAgentChatService` | Initialize a conversation with a Foundry agent, send messages with streaming responses, reset state. |
 | `IAgentService` | Create, list, and delete agents in a Foundry project. |
+| `IAzCliService` | Run `az` CLI commands as an external process and return the exit code. |
 
 ### Entities
 
@@ -46,11 +49,14 @@ Simple records and enums shared across projects:
 - **`AuthenticationMode`** — Enum with `Identity` (DefaultAzureCredential) and `Key` (access key) values.
 - **`AgentInfo`** — Lightweight record (`Id`, `Name`) returned by list operations.
 - **`AgentVersionInfo`** — Record (`Id`, `Name`, `Version`) returned by agent creation.
+- **`StreamingResponseChunk`** — Record (`Text`, `UpdateType`) representing a single chunk from a streaming agent response.
 
 ### Configuration
 
 - **`SessionManager`** — Persists settings to a local JSON file and stores secrets using platform-specific encryption (Windows DPAPI or Linux equivalent). Implements `ISessionManager`.
-- **`AgentConfiguration`** — Deserializes agent definition JSON files. Supports instructions as either a single string or an array of strings.
+- **`SessionSettings`** — POCO holding the current session's authentication mode, endpoint, access key, custom settings, and secrets (secrets are excluded from JSON serialization).
+
+> **Note:** `AgentConfiguration.cs` uses the `FoundryFriend.Core.Configuration` namespace but is physically located in the `FoundryFriend.CLI` project (`Commands/Agent/AgentConfiguration.cs`), since it is only used by the agent-related CLI commands.
 
 ### Security
 

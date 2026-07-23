@@ -72,9 +72,24 @@ internal class LoadingIndicator : IDisposable
     /// </summary>
     public enum Style
     {
+        /// <summary>
+        /// A rotating spinner animation using the characters '|', '/', '-', '\'.
+        /// </summary>
         Spinner,
+
+        /// <summary>
+        /// A pulsing dots animation using the characters '.', 'o', 'O', 'o'.
+        /// </summary>
         Dots,
+
+        /// <summary>
+        /// A rotating arrow animation cycling through the eight compass directions.
+        /// </summary>
         Arrow,
+
+        /// <summary>
+        /// A Braille pattern spinner animation.
+        /// </summary>
         Braille
     }
 

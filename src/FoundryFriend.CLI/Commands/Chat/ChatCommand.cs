@@ -16,6 +16,7 @@ internal class ChatCommand : CommandBase
     private readonly IChatService _chatService;
     private readonly Option<string> _systemMessageOption;
     private readonly Option<string> _modelDeployNameOption;
+    private readonly Option<string> _projectNameOption;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ChatCommand"/> class.
@@ -26,6 +27,14 @@ internal class ChatCommand : CommandBase
         base("chat", "Start a chat with a specific model deployment in Foundry", sessionManager)
     {
         _chatService = chatService;
+
+        _projectNameOption = new Option<string>("--project-name")
+        {
+            Description = "The name of the project in Foundry contains the model deployment",
+            Required = true
+        };
+        _projectNameOption.Aliases.Add("-p");
+        this.Options.Add(_projectNameOption);
 
         _modelDeployNameOption = new Option<string>(name: "--model-deployment")
         {
@@ -50,6 +59,7 @@ internal class ChatCommand : CommandBase
     {
         var modelName = parseResult.GetValue(_modelDeployNameOption);
         var systemMessage = parseResult.GetValue(_systemMessageOption);
+        var projectName = parseResult.GetValue(_projectNameOption);
 
         // 1. Load and validate session configuration
         await _sessionManager.LoadSettingsAsync();
@@ -61,23 +71,10 @@ internal class ChatCommand : CommandBase
             return;
         }
 
-        var authMode = _sessionManager.GetAuthenticationMode();
-        string? accessKey = null;
-
-        if (authMode == AuthenticationMode.Key)
-        {
-            accessKey = _sessionManager.GetAccessKey();
-            if (string.IsNullOrWhiteSpace(accessKey))
-            {
-                ConsoleUtility.WriteLine("Error: access key not configured. Use 'set' command to configure it.", ConsoleColor.Red);
-                return;
-            }
-        }
-
         // 2. Initialize the chat service
-        _chatService.Initialize(endpoint, authMode, accessKey, modelName!, systemMessage);
+        _chatService.Initialize(endpoint, projectName!, modelName!, systemMessage);
 
-        ConsoleUtility.WriteLine($"Chat started with model '{modelName}'. Type 'exit' or 'quit' to stop.", ConsoleColor.Green);
+        ConsoleUtility.WriteLine($"Chat started with model '{modelName} in {projectName} project'. Type 'exit' or 'quit' to stop.", ConsoleColor.Green);
         ConsoleUtility.WriteLine(new string('-', 50), ConsoleColor.Green);
 
         // 3. Multi-turn chat loop — only console I/O here

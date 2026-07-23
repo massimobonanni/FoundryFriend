@@ -23,12 +23,10 @@ public interface IChatService
     /// Must be called before <see cref="SendMessageStreamingAsync"/>.
     /// </summary>
     /// <param name="endpoint">The Azure AI Foundry endpoint URL.</param>
-    /// <param name="authMode">The authentication mode (Key or Identity).</param>
-    /// <param name="accessKey">The access key, required when <paramref name="authMode"/> is <see cref="AuthenticationMode.Key"/>.</param>
+    /// <param name="projectName">The name of the project in Foundry.</param>
     /// <param name="modelDeploymentName">The name of the model deployment to target.</param>
     /// <param name="systemMessage">An optional system message to set the assistant's behavior.</param>
-    void Initialize(string endpoint, AuthenticationMode authMode, string? accessKey,
-        string modelDeploymentName, string? systemMessage);
+    void Initialize(string endpoint, string projectName, string modelDeploymentName, string? systemMessage);
 
     /// <summary>
     /// Resets the conversation history, clearing all previous messages.

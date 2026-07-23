@@ -68,13 +68,6 @@ internal class AgentCreateCommand : CommandBase
             return;
         }
 
-        var authMode = _sessionManager.GetAuthenticationMode();
-        if (authMode == AuthenticationMode.Key)
-        {
-            ConsoleUtility.WriteLine("Error: Agent creation requires Identity authentication.", ConsoleColor.Red);
-            return;
-        }
-
         // 2. Initialize the service and create the agent
         _agentService.Initialize(endpoint, projectName);
 

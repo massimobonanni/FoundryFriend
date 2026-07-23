@@ -20,6 +20,7 @@ FoundryFriend.CLI/
 │   │   └── ChatCommand.cs      # Interactive multi-turn chat via IChatService
 │   ├── Agent/                  # Agent management
 │   │   ├── AgentCommand.cs     # Parent group command
+│   │   ├── AgentConfiguration.cs   # JSON-serializable agent definition (loaded from config files)
 │   │   ├── AgentCreateCommand.cs   # Create agent from JSON config
 │   │   ├── AgentListCommand.cs     # List agents in a project
 │   │   ├── AgentChatCommand.cs     # Interactive chat with an agent

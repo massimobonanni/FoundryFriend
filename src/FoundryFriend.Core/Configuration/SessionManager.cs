@@ -225,47 +225,21 @@ public class SessionManager : ISessionManager
         return _currentSettings.Secrets.GetValueOrDefault(key);
     }
 
-
     /// <summary>
-    /// Sets the authentication mode for the current session.
+    /// Sets the service endpoint URL for the current session.
     /// </summary>
-    /// <param name="mode">The <see cref="AuthenticationMode"/> value to persist as a custom setting.</param>
-    public void SetAuthenticationMode(AuthenticationMode mode)
-    {
-        this._currentSettings.AuthenticationMode = mode;
-    }
-
-    /// <summary>
-    /// Gets the authentication mode for the current session.
-    /// </summary>
-    /// <returns>
-    /// The <see cref="AuthenticationMode"/> value stored in the custom settings if present and valid;
-    /// otherwise, <see cref="AuthenticationMode.Identity"/> as the default.
-    /// </returns>
-    public AuthenticationMode GetAuthenticationMode()
-    {
-        return _currentSettings.AuthenticationMode;
-    }
-
+    /// <param name="endpoint">The service endpoint URL, or <c>null</c> to clear it.</param>
     public void SetEndpoint(string? endpoint)
     {
         this._currentSettings.ServiceEndopoint = endpoint;
     }
 
+    /// <summary>
+    /// Gets the service endpoint URL configured for the current session.
+    /// </summary>
+    /// <returns>The service endpoint URL if configured; otherwise, null.</returns>
     public string? GetEndpoint()
     {
         return this._currentSettings.ServiceEndopoint;
-    }
-
-
-    public void SetAccessKey(string? accessKey)
-    {
-        SetSecret("accessKey", accessKey);
-    }
-
-
-    public string? GetAccessKey()
-    {
-        return GetSecret("accessKey");
     }
 }

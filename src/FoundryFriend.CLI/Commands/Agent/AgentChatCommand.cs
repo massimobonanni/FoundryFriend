@@ -66,13 +66,6 @@ internal class AgentChatCommand : CommandBase
             return;
         }
 
-        var authMode = _sessionManager.GetAuthenticationMode();
-        if (authMode == AuthenticationMode.Key)
-        {
-            ConsoleUtility.WriteLine("Error: Agent chat requires Identity authentication.", ConsoleColor.Red);
-            return;
-        }
-
         // 2. Initialize the agent chat service
         ConsoleUtility.WriteLine("Connecting to Microsoft Foundry", ConsoleColor.Green);
 

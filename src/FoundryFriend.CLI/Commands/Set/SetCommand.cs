@@ -12,8 +12,6 @@ namespace FoundryFriend.CLI.Commands.Set;
 internal class SetCommand : CommandBase
 {
     private readonly Option<string> _foundryEndpointOption;
-    private readonly Option<AuthenticationMode> _authenticationModeOption;
-    private readonly Option<string> _accessKeyOption;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SetCommand"/> class with the specified session manager.
@@ -25,18 +23,6 @@ internal class SetCommand : CommandBase
         this.Subcommands.Add(new SetShowCommand(sessionManager));
         this.Subcommands.Add(new SetClearCommand(sessionManager));
 
-        _authenticationModeOption = new Option<AuthenticationMode>(name: "--auth-mode")
-        {
-            Description = """
-                The authentication mode.            
-                <Identity> use identity to call Foundry (you need an az login before run the console 
-                <Key> use access key to call Foundry
-            """,
-            Required = false,
-        };
-        _authenticationModeOption.Aliases.Add("-am");
-        this.Options.Add(_authenticationModeOption);
-
         _foundryEndpointOption = new Option<string>(name: "--endpoint")
         {
             Description = "The Foundry service endpoint",
@@ -45,25 +31,12 @@ internal class SetCommand : CommandBase
         _foundryEndpointOption.Aliases.Add("-e");
         this.Options.Add(_foundryEndpointOption);
 
-        _accessKeyOption = new Option<string>(name: "--key")
-        {
-            Description = "The Foundry service access key",
-            Required = false,
-        };
-        _accessKeyOption.Aliases.Add("-k");
-        this.Options.Add(_accessKeyOption);
-
         this.SetAction(CommandHandler);
     }
 
     private async Task CommandHandler(ParseResult parseResult, CancellationToken cancellationToken)
     {
         await this._sessionManager.LoadSettingsAsync();
-
-        if (parseResult.TryGetValue(_authenticationModeOption, out var authMode))
-        {
-            this._sessionManager.SetAuthenticationMode(authMode);
-        }
 
         if (parseResult.TryGetValue(_foundryEndpointOption, out var endpointValue))
         {
@@ -74,11 +47,6 @@ internal class SetCommand : CommandBase
                 return;
             }
             this._sessionManager.SetEndpoint(endpointValue);
-        }
-
-        if (parseResult.TryGetValue(_accessKeyOption, out var accessKey))
-        {
-            this._sessionManager.SetAccessKey(accessKey);
         }
 
         await this._sessionManager.SaveSettingsAsync();

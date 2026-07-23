@@ -42,18 +42,6 @@ public interface ISessionManager
     Task SaveSettingsAsync();
 
     /// <summary>
-    /// Sets the authentication mode for the current session.
-    /// </summary>
-    /// <param name="mode">The <see cref="AuthenticationMode"/> to apply to the current session.</param>
-    void SetAuthenticationMode(AuthenticationMode mode);
-
-    /// <summary>
-    /// Gets the current authentication mode for the session.
-    /// </summary>
-    /// <returns>The current <see cref="AuthenticationMode"/> applied to the session.</returns>
-    AuthenticationMode GetAuthenticationMode();
-
-    /// <summary>
     /// Sets the endpoint URL used to connect to the Azure AI Foundry service.
     /// </summary>
     /// <param name="endpoint">The endpoint URL to store, or <c>null</c> to clear the current value.</param>
@@ -64,18 +52,6 @@ public interface ISessionManager
     /// </summary>
     /// <returns>The stored endpoint URL, or <c>null</c> if not set.</returns>
     string? GetEndpoint();
-
-    /// <summary>
-    /// Sets the access key used for authenticating with the Azure AI Foundry service.
-    /// </summary>
-    /// <param name="accessKey">The access key to store, or <c>null</c> to clear the current value.</param>
-    void SetAccessKey(string? accessKey);
-
-    /// <summary>
-    /// Gets the access key used for authenticating with the Azure AI Foundry service.
-    /// </summary>
-    /// <returns>The stored access key, or <c>null</c> if not set.</returns>
-    string? GetAccessKey();
 
     /// <summary>
     /// Sets a secret value in secure storage, identified by the specified key.
