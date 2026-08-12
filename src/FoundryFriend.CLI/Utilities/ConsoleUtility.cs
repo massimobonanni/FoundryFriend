@@ -56,7 +56,7 @@ internal static class ConsoleUtility
     }
 
     /// <summary>
-    /// Writes the application banner "Promptus Maximus" to the console in ASCII art format using Figgle fonts.
+    /// Writes the application banner to the console in ASCII art format using Figgle fonts.
     /// The banner is displayed in green color with blank lines before and after for visual separation.
     /// </summary>
     public static void WriteApplicationBanner()
